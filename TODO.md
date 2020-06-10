@@ -13,4 +13,5 @@ Game class:
 - applies the rules at each time step
 - has a clock of some kind
 
-I want to write unit tests, to get the hang of `cargo test`
+I want to write unit tests, to get the hang of `cargo test`. NOTE these should be inside modules. The separate tests directory is for integration tests
+Write both unit tests (inside modules) and integration tests (tests directory), even if this is overkill
