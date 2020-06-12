@@ -1,3 +1,11 @@
+pub struct Game { columns: i32, rows: i32 }
+
+impl Game {
+    pub fn new(columns: i32, rows: i32) -> Game {
+        Game { columns: columns, rows: rows }
+    }
+}
+
 fn dumb_function_to_trial_unit_testing(a: u32) -> u32 {
     a
 }
