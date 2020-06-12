@@ -68,8 +68,10 @@ impl Display {
         Display { columns: columns, rows: rows }
     }
 
-    pub fn draw(&self, state: Vec<Vec<bool>>) {
-        let mut event_loop = glutin::event_loop::EventLoop::new();
+    pub fn draw<F: 'static>(&self, get_next_state_func: F)
+        where F: Fn() -> Vec<Vec<bool>>
+    {
+        let event_loop = glutin::event_loop::EventLoop::new();
         let wb = glutin::window::WindowBuilder::new();
         let cb = glutin::ContextBuilder::new();
         let display = glium::Display::new(wb, cb, &event_loop).unwrap();
@@ -107,7 +109,8 @@ impl Display {
 			}
 
             let mut target = display.draw();
-            
+
+            // Draw background
             target.clear_color(
                 BACKGROUND.red,
                 BACKGROUND.green,
@@ -115,6 +118,10 @@ impl Display {
                 1.0,
             );
 
+            // Draw cells
+            let game_state = get_next_state_func();
+
+            // Draw gridlines
             for x in &vertical_gridline_positions {
                 draw_gridline(&display, &mut target, *x, 1.0, *x, -1.0);
             }

@@ -1,8 +1,26 @@
-pub struct Game { columns: i32, rows: i32 }
+use rand::Rng;
+
+pub struct Game { columns: i32, rows: i32, state_counter: i32 }
+
+static INITIAL_PROPORTION: f32 = 0.5;
 
 impl Game {
     pub fn new(columns: i32, rows: i32) -> Game {
-        Game { columns: columns, rows: rows }
+        Game { columns: columns, rows: rows, state_counter: 0 }
+    }
+
+    pub fn get_next_state(&self) -> Vec<Vec<bool>> {
+        // Randomly set values if this is the first state, otherwise, use the rules
+        let mut rng = rand::thread_rng();
+        let mut result = vec![];
+        for _row in 0..self.rows {
+            let mut row_result = vec![];
+            for _column in 0..self.columns {
+                row_result.push(rng.gen_range(0.0, 1.0) < INITIAL_PROPORTION);
+            }
+            result.push(row_result);
+        }
+        result
     }
 }
 
