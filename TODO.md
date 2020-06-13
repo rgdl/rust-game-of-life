@@ -13,5 +13,10 @@ Game class:
 - applies the rules at each time step
 - has a clock of some kind
 
-I want to write unit tests, to get the hang of `cargo test`. NOTE these should be inside modules. The separate tests directory is for integration tests
-Write both unit tests (inside modules) and integration tests (tests directory), even if this is overkill
+Don't worry about unit tests. I think I've learned what I need to learn about that.
+
+
+BUGS:
+- awkward resize on startup
+- event loop timing not based on the number of milliseconds I pass it
+- horrible performance at scale. Maybe the openGL calls could be batched more?

@@ -1,46 +1,72 @@
 use rand::Rng;
 
-pub struct Game { columns: i32, rows: i32, state_counter: i32 }
+pub struct Game { columns: i32, rows: i32, is_new: bool, state: Vec<Vec<bool>>}
 
 static INITIAL_PROPORTION: f32 = 0.5;
 
+fn get_random_state(columns: i32, rows: i32) -> Vec<Vec<bool>> {
+    let mut rng = rand::thread_rng();
+    let mut result = vec![];
+    for _row in 0..rows {
+        let mut row_result = vec![];
+        for _column in 0..columns {
+            row_result.push(rng.gen_range(0.0, 1.0) < INITIAL_PROPORTION);
+        }
+        result.push(row_result);
+    }
+    result
+}
+
+fn will_cell_survive(n_neighbours: i32, currently_alive: bool) -> bool {
+    match n_neighbours {
+        0..=1 => false,
+        2 => currently_alive,
+        3 => true,
+        _ => false,
+    }
+}
+
 impl Game {
     pub fn new(columns: i32, rows: i32) -> Game {
-        Game { columns: columns, rows: rows, state_counter: 0 }
+        Game { columns: columns, rows: rows, is_new: true, state: get_random_state(columns, rows) }
+    }
+ 
+    pub fn get_next_state(&mut self) -> Vec<Vec<bool>> {
+        if !self.is_new {
+            self.iterate();
+        } else {
+            self.is_new = false;
+        }
+        self.state.to_vec()
     }
 
-    pub fn get_next_state(&self) -> Vec<Vec<bool>> {
-        // Randomly set values if this is the first state, otherwise, use the rules
-        let mut rng = rand::thread_rng();
+    fn iterate(&mut self) {
         let mut result = vec![];
-        for _row in 0..self.rows {
+        for row in 0..self.rows {
             let mut row_result = vec![];
-            for _column in 0..self.columns {
-                row_result.push(rng.gen_range(0.0, 1.0) < INITIAL_PROPORTION);
+            for column in 0..self.columns {
+                let n_neighbours = self.get_n_neighbours(row, column);
+                row_result.push(will_cell_survive(n_neighbours, self.state[row as usize][column as usize]));
             }
             result.push(row_result);
         }
-        result
-    }
-}
-
-fn dumb_function_to_trial_unit_testing(a: u32) -> u32 {
-    a
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn dumb_passing_test() {
-        let test_value = 5u32;
-        assert_eq!(test_value, dumb_function_to_trial_unit_testing(test_value));
+        self.state = result; 
     }
 
-    //#[test]
-    //fn dumb_failing_test() {
-    //    let test_value = 5u32;
-    //    assert_eq!(test_value + 2, dumb_function_to_trial_unit_testing(test_value));
-    //}
+    fn get_n_neighbours(&self, row: i32, column: i32) -> i32 {
+        let mut n_neighbours = 0;
+        for row_shift in [-1, 0, 1].iter() {
+            for column_shift in [-1, 0, 1].iter() {
+                if row + row_shift < 0 || row + row_shift >= self.rows { continue }
+                if column + column_shift < 0 || column + column_shift >= self.columns { continue }
+                if *row_shift == 0 && *column_shift == 0 { continue }
+                if self.state[(row + row_shift) as usize][(column + column_shift) as usize] {
+                    n_neighbours += 1;
+                }
+            }
+        }
+        n_neighbours
+    }
+
 }
+
