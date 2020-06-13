@@ -1,8 +1,8 @@
 mod display;
 mod game;
 
-static COLUMNS: i32 = 20;
-static ROWS: i32 = 13; 
+static COLUMNS: i32 = 50;
+static ROWS: i32 = 30; 
 
 fn main() {
     let mut game = game::Game::new(COLUMNS, ROWS);

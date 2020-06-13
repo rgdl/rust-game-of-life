@@ -18,8 +18,8 @@ struct Vertex {
 glium::implement_vertex!(Vertex, position);
 
 static BACKGROUND: Colour = Colour { red: 0.1, green: 0.0, blue: 0.6 };
-static GRIDLINES: Colour = Colour { red: 0.0, green: 1.0, blue: 0.0 };
-static CELL: Colour = Colour { red: 1.0, green: 0.0, blue: 0.0 };
+static CELL: Colour = Colour { red: 0.0, green: 0.7, blue: 0.0 };
+static GRIDLINES: Colour = Colour { red: 0.7, green: 0.0, blue: 0.0 };
 
 static WINDOW_TITLE: &str = "Game of Life";
 static WINDOW_HEIGHT: i32 = 500;
