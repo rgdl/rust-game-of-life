@@ -2,7 +2,7 @@ use glium::{glutin, Surface};
 
 pub struct Display { columns: i32, rows: i32 }
 
-static REFRESH_PERIOD_MS: u64 = 1000;
+static REFRESH_PERIOD_MS: u64 = 100;
 
 struct Colour {
     red: f32,
@@ -116,7 +116,7 @@ impl Display {
         Display { columns: columns, rows: rows }
     }
 
-    pub fn draw<F: 'static>(&self, mut get_next_state_func: F)
+    pub fn run<F: 'static>(&self, mut get_next_state_func: F)
         where F: FnMut() -> Vec<Vec<bool>>
     {
         let event_loop = glutin::event_loop::EventLoop::new();
@@ -147,8 +147,7 @@ impl Display {
         horizontal_gridline_positions.push(2.0);
 
 		event_loop.run(move |ev, _, control_flow| {
-			let next_frame_time = std::time::Instant::now() + std::time::Duration::from_millis(REFRESH_PERIOD_MS);
-			*control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
+            std::thread::sleep(std::time::Duration::from_millis(REFRESH_PERIOD_MS));
 			match ev {
 				glutin::event::Event::WindowEvent { event, .. } => match event {
 					glutin::event::WindowEvent::CloseRequested => {
@@ -182,15 +181,6 @@ impl Display {
                             x_2: vertical_gridline_positions[*column + 1],
                             y_2: horizontal_gridline_positions[*row + 1],
                         });
-                        // Draw the cell
-                        //draw_cell(
-                        //    &display,
-                        //    &mut target,
-                        //    vertical_gridline_positions[*column],
-                        //    horizontal_gridline_positions[*row],
-                        //    vertical_gridline_positions[*column + 1],
-                        //    horizontal_gridline_positions[*row + 1],
-                        //);
                     }
                 }
             }

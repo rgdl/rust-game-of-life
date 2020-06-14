@@ -17,6 +17,4 @@ Don't worry about unit tests. I think I've learned what I need to learn about th
 
 
 BUGS:
-- awkward resize on startup
-- event loop timing not based on the number of milliseconds I pass it
-- horrible performance at scale. Maybe the openGL calls could be batched more?
+- awkward resize on startup. Can we start fullscreen?
