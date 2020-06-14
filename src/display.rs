@@ -29,6 +29,15 @@ static WINDOW_SHAPE: glutin::dpi::LogicalSize<f64> = glutin::dpi::LogicalSize::n
     WINDOW_HEIGHT as f64,
 );
 
+// Constants for OpenGL calls
+static VERTEX_SHADER_SRC: &str = "
+    #version 140
+    in vec2 position;
+    void main() {
+        gl_Position = vec4(position, 0.0, 1.0);
+    }
+";
+
 fn draw_cell(display: &glium::Display, target: &mut glium::Frame, x_1: f32, y_1: f32, x_2: f32, y_2: f32) {
     // Draw a square by drawing 2 triangles
     let shape_1 = vec![
@@ -47,14 +56,6 @@ fn draw_cell(display: &glium::Display, target: &mut glium::Frame, x_1: f32, y_1:
     let vertex_buffer_2 = glium::VertexBuffer::new(display, &shape_2).unwrap();
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
-    let vertex_shader_src = "
-        #version 140
-        in vec2 position;
-        void main() {
-            gl_Position = vec4(position, 0.0, 1.0);
-        }
-    ";
-
     let fragment_shader_src = format!("
         #version 140
         out vec4 color;
@@ -63,7 +64,7 @@ fn draw_cell(display: &glium::Display, target: &mut glium::Frame, x_1: f32, y_1:
         }}
     ", CELL.red, CELL.green, CELL.blue);
 
-    let program = glium::Program::from_source(display, vertex_shader_src, &fragment_shader_src, None).unwrap();
+    let program = glium::Program::from_source(display, VERTEX_SHADER_SRC, &fragment_shader_src, None).unwrap();
 
     (*target).draw(
         &vertex_buffer_1,
@@ -82,22 +83,8 @@ fn draw_cell(display: &glium::Display, target: &mut glium::Frame, x_1: f32, y_1:
     ).unwrap();
 }
 
-fn draw_gridline(display: &glium::Display, target: &mut glium::Frame, from_x: f32, from_y: f32, to_x: f32, to_y: f32) {
-    let shape = vec![
-        Vertex { position: [from_x, from_y] },
-        Vertex { position: [to_x, to_y] },
-    ];
-
-    let vertex_buffer = glium::VertexBuffer::new(display, &shape).unwrap();
+fn draw_all_gridlines(display: &glium::Display, target: &mut glium::Frame, all_x: &Vec<f32>, all_y: &Vec<f32>) {
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::LinesList);
-
-    let vertex_shader_src = "
-        #version 140
-        in vec2 position;
-        void main() {
-            gl_Position = vec4(position, 0.0, 1.0);
-        }
-    ";
 
     let fragment_shader_src = format!("
         #version 140
@@ -107,8 +94,18 @@ fn draw_gridline(display: &glium::Display, target: &mut glium::Frame, from_x: f3
         }}
     ", GRIDLINES.red, GRIDLINES.green, GRIDLINES.blue);
 
-    let program = glium::Program::from_source(display, vertex_shader_src, &fragment_shader_src, None).unwrap();
+    let program = glium::Program::from_source(display, VERTEX_SHADER_SRC, &fragment_shader_src, None).unwrap();
 
+    let mut vertices = vec![];
+    for y in all_y {
+        vertices.push(Vertex { position: [-1.0, *y] });
+        vertices.push(Vertex { position: [1.0, *y] });
+    }
+    for x in all_x {
+        vertices.push(Vertex { position: [*x, -1.0] });
+        vertices.push(Vertex { position: [*x, 1.0] });
+    }
+    let vertex_buffer = glium::VertexBuffer::new(display, &vertices).unwrap();
     (*target).draw( 
         &vertex_buffer,
         &indices,
@@ -196,17 +193,15 @@ impl Display {
             }
 
             // Draw gridlines
-            for x in &vertical_gridline_positions {
-                draw_gridline(&display, &mut target, *x, 1.0, *x, -1.0);
-            }
-            for y in &horizontal_gridline_positions {
-                draw_gridline(&display, &mut target, 1.0, *y, -1.0, *y);
-            }
-            
+            draw_all_gridlines(
+                &display,
+                &mut target,
+                &vertical_gridline_positions,
+                &horizontal_gridline_positions,
+            );
+ 
             target.finish().unwrap();
 		});
     }
 }
-
-
 
