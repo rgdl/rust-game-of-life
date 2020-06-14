@@ -10,6 +10,13 @@ struct Colour {
     blue: f32,
 }
 
+struct Square {
+    x_1: f32,
+    y_1: f32,
+    x_2: f32,
+    y_2: f32,
+}
+
 #[derive(Copy, Clone)]
 struct Vertex {
     position: [f32; 2],
@@ -38,22 +45,19 @@ static VERTEX_SHADER_SRC: &str = "
     }
 ";
 
-fn draw_cell(display: &glium::Display, target: &mut glium::Frame, x_1: f32, y_1: f32, x_2: f32, y_2: f32) {
-    // Draw a square by drawing 2 triangles
-    let shape_1 = vec![
-        Vertex { position: [x_1, y_1] },
-        Vertex { position: [x_1, y_2] },
-        Vertex { position: [x_2, y_2] },
-    ];
+fn draw_all_cells(display: &glium::Display, target: &mut glium::Frame, squares: Vec<Square>) {
+    let mut vertices = vec![];
+    for square in squares {
+        vertices.push(Vertex { position: [square.x_1, square.y_1] });
+        vertices.push(Vertex { position: [square.x_1, square.y_2] });
+        vertices.push(Vertex { position: [square.x_2, square.y_2] });
 
-    let shape_2 = vec![
-        Vertex { position: [x_1, y_1] },
-        Vertex { position: [x_2, y_1] },
-        Vertex { position: [x_2, y_2] },
-    ];
+        vertices.push(Vertex { position: [square.x_1, square.y_1] });
+        vertices.push(Vertex { position: [square.x_2, square.y_1] });
+        vertices.push(Vertex { position: [square.x_2, square.y_2] });
+    }
 
-    let vertex_buffer_1 = glium::VertexBuffer::new(display, &shape_1).unwrap();
-    let vertex_buffer_2 = glium::VertexBuffer::new(display, &shape_2).unwrap();
+    let vertex_buffer = glium::VertexBuffer::new(display, &vertices).unwrap();
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
     let fragment_shader_src = format!("
@@ -67,15 +71,7 @@ fn draw_cell(display: &glium::Display, target: &mut glium::Frame, x_1: f32, y_1:
     let program = glium::Program::from_source(display, VERTEX_SHADER_SRC, &fragment_shader_src, None).unwrap();
 
     (*target).draw(
-        &vertex_buffer_1,
-        &indices,
-        &program,
-        &glium::uniforms::EmptyUniforms,
-        &Default::default()
-    ).unwrap();
-
-    (*target).draw(
-        &vertex_buffer_2,
+        &vertex_buffer,
         &indices,
         &program,
         &glium::uniforms::EmptyUniforms,
@@ -176,21 +172,29 @@ impl Display {
 
             // Draw cells
             let game_state = get_next_state_func();
+            let mut squares = vec![];
             for row in &rows_range {
                 for column in &columns_range {
                     if game_state[*row][*column] {
+                        squares.push(Square {
+                            x_1: vertical_gridline_positions[*column],
+                            y_1: horizontal_gridline_positions[*row],
+                            x_2: vertical_gridline_positions[*column + 1],
+                            y_2: horizontal_gridline_positions[*row + 1],
+                        });
                         // Draw the cell
-                        draw_cell(
-                            &display,
-                            &mut target,
-                            vertical_gridline_positions[*column],
-                            horizontal_gridline_positions[*row],
-                            vertical_gridline_positions[*column + 1],
-                            horizontal_gridline_positions[*row + 1],
-                        );
+                        //draw_cell(
+                        //    &display,
+                        //    &mut target,
+                        //    vertical_gridline_positions[*column],
+                        //    horizontal_gridline_positions[*row],
+                        //    vertical_gridline_positions[*column + 1],
+                        //    horizontal_gridline_positions[*row + 1],
+                        //);
                     }
                 }
             }
+            draw_all_cells(&display, &mut target, squares);
 
             // Draw gridlines
             draw_all_gridlines(
