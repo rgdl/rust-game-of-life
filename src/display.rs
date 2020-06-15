@@ -120,12 +120,11 @@ impl Display {
         where F: FnMut() -> Vec<Vec<bool>>
     {
         let event_loop = glutin::event_loop::EventLoop::new();
-        let wb = glutin::window::WindowBuilder::new();
+        let wb = glutin::window::WindowBuilder::new().with_inner_size::<glutin::dpi::LogicalSize<f64>>(WINDOW_SHAPE.into());
         let cb = glutin::ContextBuilder::new();
         let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
         display.gl_window().window().set_title(WINDOW_TITLE);
-        display.gl_window().window().set_inner_size(WINDOW_SHAPE);
 
         let columns_range = (0..(self.columns as usize)).collect::<Vec<usize>>();
 
