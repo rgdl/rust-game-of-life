@@ -2,15 +2,13 @@ use rand::Rng;
 
 pub struct Game { columns: i32, rows: i32, is_new: bool, state: Vec<Vec<bool>>}
 
-static INITIAL_PROPORTION: f32 = 0.5;
-
-fn get_random_state(columns: i32, rows: i32) -> Vec<Vec<bool>> {
+fn get_random_state(columns: i32, rows: i32, initial_proportion: f32) -> Vec<Vec<bool>> {
     let mut rng = rand::thread_rng();
     let mut result = vec![];
     for _row in 0..rows {
         let mut row_result = vec![];
         for _column in 0..columns {
-            row_result.push(rng.gen_range(0.0, 1.0) < INITIAL_PROPORTION);
+            row_result.push(rng.gen_range(0.0, 1.0) < initial_proportion);
         }
         result.push(row_result);
     }
@@ -27,8 +25,8 @@ fn will_cell_survive(n_neighbours: i32, currently_alive: bool) -> bool {
 }
 
 impl Game {
-    pub fn new(columns: i32, rows: i32) -> Game {
-        Game { columns: columns, rows: rows, is_new: true, state: get_random_state(columns, rows) }
+    pub fn new(columns: i32, rows: i32, initial_proportion: f32) -> Game {
+        Game { columns: columns, rows: rows, is_new: true, state: get_random_state(columns, rows, initial_proportion) }
     }
  
     pub fn get_next_state(&mut self) -> Vec<Vec<bool>> {

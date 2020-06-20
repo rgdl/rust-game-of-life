@@ -1,8 +1,6 @@
 use glium::{glutin, Surface};
 
-pub struct Display { columns: i32, rows: i32 }
-
-static REFRESH_PERIOD_MS: u64 = 100;
+pub struct Display { columns: i32, rows: i32, refresh_period_ms: u64 }
 
 struct Colour {
     red: f32,
@@ -112,8 +110,8 @@ fn draw_all_gridlines(display: &glium::Display, target: &mut glium::Frame, all_x
 }
 
 impl Display {
-    pub fn new(columns: i32, rows: i32) -> Display {
-        Display { columns: columns, rows: rows }
+    pub fn new(columns: i32, rows: i32, refresh_period_ms: u64) -> Display {
+        Display { columns: columns, rows: rows, refresh_period_ms: refresh_period_ms }
     }
 
     pub fn run<F: 'static>(&self, mut get_next_state_func: F)
@@ -144,9 +142,9 @@ impl Display {
             );
         }
         horizontal_gridline_positions.push(2.0);
-
+		let refresh_period_ms = self.refresh_period_ms; 
 		event_loop.run(move |ev, _, control_flow| {
-            std::thread::sleep(std::time::Duration::from_millis(REFRESH_PERIOD_MS));
+            std::thread::sleep(std::time::Duration::from_millis(refresh_period_ms));
 			match ev {
 				glutin::event::Event::WindowEvent { event, .. } => match event {
 					glutin::event::WindowEvent::CloseRequested => {
